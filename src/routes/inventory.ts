@@ -22,52 +22,57 @@ HOSPITALS.forEach(hospital => {
   hospitalInventories.set(hospital.id, new HospitalInventory(hospital, eigenDAAdapter));
 });
 
-// Get all hospitals
-router.get('/hospitals', (req, res) => {
-  res.json({ success: true, hospitals: HOSPITALS });
+// Check if a drug is available at Stanford Hospital
+router.get('/stanford/check/:drugName', async (req, res) => {
+  const stanfordInventory = hospitalInventories.get('stanford-hospital');
+  if (!stanfordInventory) {
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Stanford Hospital inventory not initialized' 
+    });
+  }
+
+  const drugName = req.params.drugName;
+  const isAvailable = await stanfordInventory.checkDrugAvailability(drugName, 1);
+
+  return res.json({
+    success: true,
+    available: isAvailable
+  });
 });
 
-// Get hospital inventory
-router.get('/hospital/:hospitalId', (req, res) => {
-  const inventory = hospitalInventories.get(req.params.hospitalId);
-  if (!inventory) {
-    return res.status(404).json({ success: false, error: 'Hospital not found' });
-  }
-  res.json({ success: true, inventory });
-});
+// Search for a drug at hospitals other than Stanford
+router.get('/search/other-hospitals/:drugName', async (req, res) => {
+  const drugName = req.params.drugName;
+  const availableHospitals: Array<{ hospitalId: string; name: string; location: string }> = [];
 
-// Update inventory for specific hospital
-router.post('/hospital/:hospitalId/update', async (req, res) => {
-  const inventory = hospitalInventories.get(req.params.hospitalId);
-  if (!inventory) {
-    return res.status(404).json({ success: false, error: 'Hospital not found' });
-  }
+  for (const [hospitalId, inventory] of hospitalInventories) {
+    // Skip Stanford Hospital
+    if (hospitalId === 'stanford-hospital') continue;
 
-  try {
-    const updates = req.body.updates;
-    const root = await inventory.updateInventory(updates);
-    res.json({ success: true, root });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Generate proof for a drug in specific hospital
-router.get('/hospital/:hospitalId/proof/:drugName', async (req, res) => {
-  const inventory = hospitalInventories.get(req.params.hospitalId);
-  if (!inventory) {
-    return res.status(404).json({ success: false, error: 'Hospital not found' });
-  }
-
-  try {
-    const proof = await inventory.generateDrugProof(req.params.drugName);
-    if (!proof) {
-      return res.status(404).json({ success: false, error: 'Drug not found' });
+    try {
+      const isAvailable = await inventory.checkDrugAvailability(drugName, 1);
+      if (isAvailable) {
+        // Find the hospital info from HOSPITALS array
+        const hospitalInfo = HOSPITALS.find(h => h.id === hospitalId);
+        if (hospitalInfo) {
+          availableHospitals.push({
+            hospitalId: hospitalInfo.id,
+            name: hospitalInfo.name,
+            location: hospitalInfo.location
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`Error checking hospital ${hospitalId}:`, error);
+      continue;
     }
-    res.json({ success: true, proof });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
   }
+
+  return res.json({
+    success: true,
+    results: availableHospitals
+  });
 });
 
 export default router; 
