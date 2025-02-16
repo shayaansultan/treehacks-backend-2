@@ -22,6 +22,8 @@ async function main() {
     const balance = await eigenDA.getBalance();
     console.log('Balance:', balance);
 
+    return;
+
   } catch (error: any) {
     console.error('Error:', error.message);
     if (error.response) {

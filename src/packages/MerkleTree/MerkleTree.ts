@@ -1,117 +1,56 @@
-import * as crypto from 'crypto';
-import { MerkleNode, Drug, MerkleProof, DrugProof } from './types';
+import { MerkleTree as MerkleTreeJS } from 'merkletreejs';
+import { SHA256 } from 'crypto-js';
+import { Drug, DrugProof } from './types';
 
 export class MerkleTree {
-  public root: MerkleNode | null = null;
-  public leaves: MerkleNode[] = [];
+  private tree: MerkleTreeJS;
+  private leaves: string[] = [];
+  private drugMap: Map<string, Drug> = new Map();
 
-  constructor() {}
-
-  private hashData(data: Drug): string {
-    const stringData = `${data.name}:${data.quantity}`;
-    return crypto.createHash('sha256').update(stringData).digest('hex');
+  constructor() {
+    this.tree = new MerkleTreeJS([], SHA256);
   }
 
-  private hashPair(left: string, right: string): string {
-    const combined = left + right;
-    return crypto.createHash('sha256').update(combined).digest('hex');
+  private hashData(data: Drug): string {
+    return SHA256(`${data.name}:${data.quantity}`).toString();
   }
 
   buildTree(drugs: Drug[]): string {
-    // Create leaf nodes
-    this.leaves = drugs.map(drug => ({
-      hash: this.hashData(drug)
-    }));
+    this.drugMap.clear();
+    this.leaves = drugs.map(drug => {
+      const hash = this.hashData(drug);
+      this.drugMap.set(hash, drug);
+      return hash;
+    });
 
-    // If no drugs, return empty hash
-    if (this.leaves.length === 0) {
-      this.root = { hash: this.hashPair('', '') };
-      return this.root.hash;
-    }
-
-    // Build tree level by level
-    let currentLevel = this.leaves;
-
-    while (currentLevel.length > 1) {
-      const nextLevel: MerkleNode[] = [];
-
-      for (let i = 0; i < currentLevel.length; i += 2) {
-        const leftNode = currentLevel[i];
-        const rightNode = i + 1 < currentLevel.length 
-          ? currentLevel[i + 1] 
-          : currentLevel[i]; // Duplicate last node if odd number
-
-        const parentNode: MerkleNode = {
-          hash: this.hashPair(leftNode.hash, rightNode.hash),
-          left: leftNode,
-          right: rightNode
-        };
-
-        nextLevel.push(parentNode);
-      }
-
-      currentLevel = nextLevel;
-    }
-
-    this.root = currentLevel[0];
-    return this.root.hash;
+    this.tree = new MerkleTreeJS(this.leaves, SHA256);
+    return this.tree.getRoot().toString('hex');
   }
 
   generateProof(drug: Drug): DrugProof | null {
-    const targetHash = this.hashData(drug);
-    const proofs: MerkleProof[] = [];
-    
-    // Find the leaf node
-    let currentNode = this.leaves.find(leaf => leaf.hash === targetHash);
-    if (!currentNode) {
+    const leaf = this.hashData(drug);
+    if (!this.tree.getLeaves().map(l => l.toString('hex')).includes(leaf)) {
       return null;
     }
 
-    // Traverse up the tree
-    let current = currentNode;
-    let parent = this.findParent(current);
-
-    while (parent) {
-      const isLeft = parent.left === current;
-      proofs.push({
-        position: isLeft ? 'right' : 'left',
-        pairHash: isLeft ? parent.right!.hash : parent.left!.hash
-      });
-
-      current = parent;
-      parent = this.findParent(current);
-    }
-
+    const proof = this.tree.getProof(leaf);
     return {
       drug,
-      proofs,
-      root: this.root!.hash
+      proofs: proof.map(p => ({
+        position: p.position === 'right' ? 'right' : 'left',
+        pairHash: p.data.toString('hex')
+      })),
+      root: this.tree.getRoot().toString('hex')
     };
-  }
-
-  private findParent(node: MerkleNode): MerkleNode | null {
-    const findParentRecursive = (current: MerkleNode): MerkleNode | null => {
-      if (!current.left && !current.right) return null;
-      if (current.left === node || current.right === node) return current;
-
-      const leftResult = current.left ? findParentRecursive(current.left) : null;
-      if (leftResult) return leftResult;
-
-      return current.right ? findParentRecursive(current.right) : null;
-    };
-
-    return this.root ? findParentRecursive(this.root) : null;
   }
 
   verifyProof(proof: DrugProof): boolean {
-    let currentHash = this.hashData(proof.drug);
+    const leaf = this.hashData(proof.drug);
+    const proofArray = proof.proofs.map(p => ({
+      position: p.position,
+      data: Buffer.from(p.pairHash, 'hex')
+    }));
 
-    for (const p of proof.proofs) {
-      currentHash = p.position === 'left'
-        ? this.hashPair(p.pairHash, currentHash)
-        : this.hashPair(currentHash, p.pairHash);
-    }
-
-    return currentHash === proof.root;
+    return this.tree.verify(proofArray, leaf, proof.root);
   }
 } 
