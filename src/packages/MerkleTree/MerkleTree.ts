@@ -12,7 +12,7 @@ export class MerkleTree {
   }
 
   private hashData(data: Drug): string {
-    return SHA256(`${data.name}:${data.quantity}`).toString();
+    return SHA256(data.name).toString();
   }
 
   buildTree(drugs: Drug[]): string {
