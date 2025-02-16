@@ -10,6 +10,18 @@ class VerificationStep {
     required this.description,
     required this.status,
   });
+
+  VerificationStep copyWith({
+    String? title,
+    String? description,
+    String? status,
+  }) {
+    return VerificationStep(
+      title: title ?? this.title,
+      description: description ?? this.description,
+      status: status ?? this.status,
+    );
+  }
 }
 
 class VerificationProcess extends StatelessWidget {

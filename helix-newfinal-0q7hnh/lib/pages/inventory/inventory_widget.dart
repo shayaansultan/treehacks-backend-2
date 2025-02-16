@@ -413,94 +413,124 @@ class _InventoryWidgetState extends State<InventoryWidget>
                                         Align(
                                           alignment: AlignmentDirectional(
                                               -0.29, -0.27),
-                                          child: Container(
-                                            width: 200.0,
-                                            child: TextFormField(
-                                              controller: _model.textController,
-                                              focusNode:
-                                                  _model.textFieldFocusNode,
-                                              autofocus: false,
-                                              obscureText: false,
-                                              decoration: InputDecoration(
-                                                isDense: true,
-                                                labelStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                hintText: 'TextField',
-                                                hintStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                enabledBorder:
-                                                    OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                    color: Color(0x00000000),
-                                                    width: 1.0,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                ),
-                                                focusedBorder:
-                                                    OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                    color: Color(0x00000000),
-                                                    width: 1.0,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                ),
-                                                errorBorder: OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .error,
-                                                    width: 1.0,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                ),
-                                                focusedErrorBorder:
-                                                    OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .error,
-                                                    width: 1.0,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                ),
-                                                filled: true,
-                                                fillColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .secondaryBackground,
-                                              ),
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'Inter',
-                                                        letterSpacing: 0.0,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Container(
+                                                width: 200.0,
+                                                child: TextFormField(
+                                                  controller: _model.textController,
+                                                  focusNode:
+                                                      _model.textFieldFocusNode,
+                                                  autofocus: false,
+                                                  obscureText: false,
+                                                  decoration: InputDecoration(
+                                                    isDense: true,
+                                                    labelStyle:
+                                                        FlutterFlowTheme.of(context)
+                                                            .labelMedium
+                                                            .override(
+                                                              fontFamily: 'Inter',
+                                                              letterSpacing: 0.0,
+                                                            ),
+                                                    hintText: 'Enter drug name',
+                                                    hintStyle:
+                                                        FlutterFlowTheme.of(context)
+                                                            .labelMedium
+                                                            .override(
+                                                              fontFamily: 'Inter',
+                                                              letterSpacing: 0.0,
+                                                            ),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Color(0x00000000),
+                                                        width: 1.0,
                                                       ),
-                                              textAlign: TextAlign.start,
-                                              cursorColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
-                                              validator: _model
-                                                  .textControllerValidator
-                                                  .asValidator(context),
-                                            ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.0),
+                                                    ),
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Color(0x00000000),
+                                                        width: 1.0,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.0),
+                                                    ),
+                                                    errorBorder: OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: FlutterFlowTheme.of(
+                                                                context)
+                                                            .error,
+                                                        width: 1.0,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.0),
+                                                    ),
+                                                    focusedErrorBorder:
+                                                        OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: FlutterFlowTheme.of(
+                                                                context)
+                                                            .error,
+                                                        width: 1.0,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.0),
+                                                    ),
+                                                    filled: true,
+                                                    fillColor:
+                                                        FlutterFlowTheme.of(context)
+                                                            .secondaryBackground,
+                                                  ),
+                                                  style:
+                                                      FlutterFlowTheme.of(context)
+                                                          .bodyMedium
+                                                          .override(
+                                                            fontFamily: 'Inter',
+                                                            letterSpacing: 0.0,
+                                                          ),
+                                                  textAlign: TextAlign.start,
+                                                  cursorColor:
+                                                      FlutterFlowTheme.of(context)
+                                                          .primaryText,
+                                                ),
+                                              ),
+                                              SizedBox(width: 10),
+                                              FFButtonWidget(
+                                                onPressed: () async {
+                                                  context.pushNamed(
+                                                    'pending',
+                                                    queryParameters: {
+                                                      'drugName': _model.textController.text,
+                                                    }.withoutNulls,
+                                                  );
+                                                },
+                                                text: 'Search',
+                                                options: FFButtonOptions(
+                                                  height: 40,
+                                                  padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+                                                  iconPadding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                                                  color: FlutterFlowTheme.of(context).primary,
+                                                  textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                                    fontFamily: 'Inter',
+                                                    color: Colors.white,
+                                                  ),
+                                                  elevation: 3,
+                                                  borderSide: BorderSide(
+                                                    color: Colors.transparent,
+                                                    width: 1,
+                                                  ),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                         Align(

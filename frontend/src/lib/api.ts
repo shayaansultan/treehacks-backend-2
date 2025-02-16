@@ -2,7 +2,7 @@ import axios from 'axios';
 import { DrugAvailability, HospitalSearchResults } from '@/types';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://treehacks-backend-2.onrender.com',
 });
 
 export async function checkStanfordDrugAvailability(drugName: string): Promise<DrugAvailability> {

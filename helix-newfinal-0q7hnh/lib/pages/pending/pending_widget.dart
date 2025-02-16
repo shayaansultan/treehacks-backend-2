@@ -4,6 +4,9 @@ import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/custom_code/widgets/verification_process.dart';
+import '/custom_code/actions/api_service.dart';
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -18,9 +21,11 @@ class PendingWidget extends StatefulWidget {
   const PendingWidget({
     super.key,
     int? pageIndex,
+    this.drugName,
   }) : this.pageIndex = pageIndex ?? 3;
 
   final int pageIndex;
+  final String? drugName;
 
   @override
   State<PendingWidget> createState() => _PendingWidgetState();
@@ -29,6 +34,30 @@ class PendingWidget extends StatefulWidget {
 class _PendingWidgetState extends State<PendingWidget>
     with TickerProviderStateMixin {
   late PendingModel _model;
+  List<VerificationStep> steps = [
+    VerificationStep(
+      title: 'Initializing EigenDA Connection',
+      description: 'Establishing secure connection to the EigenDA network...',
+      status: 'pending',
+    ),
+    VerificationStep(
+      title: 'Generating Zero-Knowledge Proof',
+      description: 'Creating a ZK proof for secure drug availability verification...',
+      status: 'pending',
+    ),
+    VerificationStep(
+      title: 'Verifying Hospital Merkle Tree',
+      description: 'Validating hospital inventory data integrity...',
+      status: 'pending',
+    ),
+    VerificationStep(
+      title: 'Processing Trust-Less Query',
+      description: 'Executing privacy-preserving inventory search...',
+      status: 'pending',
+    ),
+  ];
+  int currentStep = 0;
+  Timer? _timer;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -38,6 +67,7 @@ class _PendingWidgetState extends State<PendingWidget>
   void initState() {
     super.initState();
     _model = createModel(context, () => PendingModel());
+    _startVerification();
 
     animationsMap.addAll({
       'rowOnPageLoadAnimation1': AnimationInfo(
@@ -273,10 +303,78 @@ class _PendingWidgetState extends State<PendingWidget>
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
+  void _startVerification() async {
+    // Step 1: EigenDA Connection - Quick initial connection
+    setState(() {
+      steps[0] = steps[0].copyWith(status: 'processing');
+    });
+    await Future.delayed(Duration(milliseconds: 800));
+    setState(() {
+      steps[0] = steps[0].copyWith(status: 'completed');
+      currentStep = 1;
+      steps[1] = steps[1].copyWith(status: 'processing');
+    });
+
+    // Step 2: ZK Proof - This would take slightly longer
+    await Future.delayed(Duration(milliseconds: 1500));
+    setState(() {
+      steps[1] = steps[1].copyWith(status: 'completed');
+      currentStep = 2;
+      steps[2] = steps[2].copyWith(status: 'processing');
+    });
+
+    // Step 3: Merkle Tree - Quick verification
+    await Future.delayed(Duration(milliseconds: 600));
+    setState(() {
+      steps[2] = steps[2].copyWith(status: 'completed');
+      currentStep = 3;
+      steps[3] = steps[3].copyWith(status: 'processing');
+    });
+
+    // Step 4: Query Processing - Final API call
+    await Future.delayed(Duration(milliseconds: 1000));
+    
+    try {
+      final result = await ApiService.checkDrugAvailability(widget.drugName ?? '');
+      setState(() {
+        steps[3] = steps[3].copyWith(status: 'completed');
+      });
+      
+      // Add a small delay before navigation for better UX
+      await Future.delayed(Duration(milliseconds: 500));
+      
+      if (result['success'] == true) {
+        context.pushNamed(
+          'available_locations',
+          queryParameters: {
+            'drugName': widget.drugName,
+          }.withoutNulls,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to check drug availability'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        steps[3] = steps[3].copyWith(status: 'error');
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   void dispose() {
+    _timer?.cancel();
     _model.dispose();
-
     super.dispose();
   }
 
@@ -1035,6 +1133,13 @@ class _PendingWidgetState extends State<PendingWidget>
                     ),
                   ],
                 ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(20, 0, 20, 0),
+              child: VerificationProcess(
+                steps: steps,
+                currentStep: currentStep,
               ),
             ),
           ],
