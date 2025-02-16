@@ -1,9 +1,10 @@
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import { EigenDAAdapter } from './packages/EigenDAAdapter';
 
 dotenv.config();
 
 async function main() {
+  console.log('got here');
   try {
     console.log('Creating EigenDA adapter...');
     const eigenDA = new EigenDAAdapter({

@@ -2,18 +2,32 @@ import { MerkleTree } from '../MerkleTree/MerkleTree';
 import { Drug, DrugProof } from '../MerkleTree/types';
 import { Hospital, InventoryItem, InventoryUpdate } from './types';
 import { EigenDAAdapter } from '../EigenDAAdapter';
+import { INITIAL_INVENTORY } from '../../data/mockData';
 
 export class HospitalInventory {
-  private merkleTree: MerkleTree;
+  public merkleTree: MerkleTree;
   private inventory: Map<string, InventoryItem>;
   private hospital: Hospital;
-  private eigenDA: EigenDAAdapter;
+  private eigenDA: EigenDAAdapter | undefined;
 
-  constructor(hospital: Hospital, eigenDA: EigenDAAdapter) {
+  constructor(hospital: Hospital, eigenDA: EigenDAAdapter | undefined) {
     this.merkleTree = new MerkleTree();
     this.inventory = new Map();
     this.hospital = hospital;
     this.eigenDA = eigenDA;
+
+    // Load initial inventory if available
+    const initialInventory = INITIAL_INVENTORY[hospital.id as keyof typeof INITIAL_INVENTORY];
+    if (initialInventory) {
+      initialInventory.forEach((drug: { name: string; quantity: number }) => {
+        this.inventory.set(drug.name, {
+          ...drug,
+          lastUpdated: Date.now()
+        });
+      });
+      // Build initial Merkle tree
+      this.merkleTree.buildTree(Array.from(this.inventory.values()));
+    }
   }
 
   async updateInventory(updates: InventoryUpdate[]): Promise<string> {
@@ -57,12 +71,12 @@ export class HospitalInventory {
     const root = this.merkleTree.buildTree(drugs);
 
     // Store root in EigenDA
-    await this.eigenDA.post({
-      type: 'hospital_inventory',
-      hospitalId: this.hospital.id,
-      root,
-      timestamp: Date.now()
-    });
+    // await this.eigenDA.post({
+    //   type: 'hospital_inventory',
+    //   hospitalId: this.hospital.id,
+    //   root,
+    //   timestamp: Date.now()
+    // });
 
     return root;
   }

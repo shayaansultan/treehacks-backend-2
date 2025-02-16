@@ -1,9 +1,9 @@
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { MerkleNode, Drug, MerkleProof, DrugProof } from './types';
 
 export class MerkleTree {
-  private root: MerkleNode | null = null;
-  private leaves: MerkleNode[] = [];
+  public root: MerkleNode | null = null;
+  public leaves: MerkleNode[] = [];
 
   constructor() {}
 
